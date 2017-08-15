@@ -72,6 +72,8 @@ for line in open("EE.txt"):
                                                                  )
  
 
+import math
+
 print " ~~~~~~~ "
 
 if options.iz == -1 or options.iz == 1 :
@@ -80,6 +82,9 @@ if options.iz == -1 or options.iz == 1 :
   print " fed = ", map_EE [ ( options.ix, options.iy, options.iz ) ] [5]
   print " cmsswId = ", map_EE [ ( options.ix, options.iy, options.iz ) ] [1]
   print " hashedId = ", map_EE [ ( options.ix, options.iy, options.iz ) ] [0]
+  dx =  options.ix - 50.5
+  dy =  options.iy - 50.5
+  print " iring = ", 40 - ( round( math.sqrt(dx*dx + dy*dy) ) - 11 )   , " dx = ", dx, "  dy = ", dy
   
   
 else :
