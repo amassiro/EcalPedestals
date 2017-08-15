@@ -12,28 +12,46 @@ void draw(std::string nameInputFile = "ana_ped_2016-2017.root", int index = 0, i
   TTree* T       = (TTree*) fileIn -> Get ("T");
   TTree* PedChan = (TTree*) fileIn -> Get ("PedChan");
   
-  Int_t           Channels;
-  Int_t           x;
-  Int_t           y;
-  Int_t           z;
+//   TGraph *gr_ped  = new TGraph();  
+//   TGraph *gr_rms  = new TGraph();  
   
-  PedChan -> SetBranchAddress("Channels", &Channels);
-  PedChan -> SetBranchAddress("x", &x);
-  PedChan -> SetBranchAddress("y", &y);
-  PedChan -> SetBranchAddress("z", &z);
-  
-  PedChan->GetEntry(index);
-  
-  std::cout << " x :  " << x << std::endl;
-  std::cout << " y :  " << y << std::endl;
-  std::cout << " z :  " << z << std::endl;
-  
-  
+  Int_t           id;
+  Int_t           run;
+  Int_t           run_type;
+  Int_t           seq_id;
+  Int_t           las_id;
+  Int_t           fill_num;
+  Int_t           run_num_infill;
+  Int_t           run_time;
+  Int_t           run_time_stablebeam;
+  Float_t         lumi;
+  Float_t         bfield;
+  Int_t           nxt;
+  Int_t           time[54];
   Int_t           fed[75848];
+  Int_t           chan[75848];
+  Float_t         ped[75848];
+  Float_t         pedrms[75848];
   
+  T -> SetBranchAddress ("id", &id);
+  T -> SetBranchAddress ("run", &run);
+  T -> SetBranchAddress ("run_type", &run_type);
+  T -> SetBranchAddress ("seq_id", &seq_id);
+  T -> SetBranchAddress ("las_id", &las_id);
+  T -> SetBranchAddress ("fill_num", &fill_num);
+  T -> SetBranchAddress ("run_num_infill", &run_num_infill);
+  T -> SetBranchAddress ("run_time", &run_time);
+  T -> SetBranchAddress ("run_time_stablebeam", &run_time_stablebeam);
+  T -> SetBranchAddress ("lumi", &lumi);
+  T -> SetBranchAddress ("bfield", &bfield);
+  T -> SetBranchAddress ("nxt", &nxt);
+  T -> SetBranchAddress ("time", time);
   T -> SetBranchAddress ("fed", fed);
+  T -> SetBranchAddress ("chan", chan);
+  T -> SetBranchAddress ("ped", ped);
+  T -> SetBranchAddress ("pedrms", pedrms);
   
-  
+    
   int nEntries = T->GetEntries();
 
   std::cout << " nEntries = " << nEntries << std::endl;
@@ -46,12 +64,38 @@ void draw(std::string nameInputFile = "ana_ped_2016-2017.root", int index = 0, i
     myList = (TEntryList*)gDirectory->Get("myList");
     T -> SetEntryList(myList); 
     
+//     nEntries = myList->GetN();
   }
    
   std::cout << " --> nEntries = " << nEntries << std::endl;
      
   int fedNumber = -1;
- 
+  
+//   for (int iEntry = 0; iEntry < nEntries; iEntry++) {
+// 
+//     if (!(iEntry%1000)) {
+//       std::cout << " iEntry = " << iEntry << " :: " << nEntries << std::endl;
+//     }
+//     
+// //     if (runNumber != -1) {
+// //       myList -> Next();
+// //     }
+// //     else {    
+//       T->GetEntry(iEntry);
+// //     }
+//     
+//     //---- decide which crystal and fed we will display
+//     if (fedNumber == -1) {
+//       fedNumber = fed [index] - 601; //---- first fed for ECAL is 601
+//     }
+//     
+//     gr_ped-> SetPoint (iEntry,   time [fedNumber]   ,   ped[index] ) ;           
+//     gr_rms-> SetPoint (iEntry,   time [fedNumber]   ,   pedrms[index] ) ;   
+//     
+//   }
+  
+  
+  
   //---- decide which crystal and fed we will display
   T->GetEntry(0);
   fedNumber = fed [index] - 601; //---- first fed for ECAL is 601
@@ -108,7 +152,4 @@ void draw(std::string nameInputFile = "ana_ped_2016-2017.root", int index = 0, i
   
   
 }
-
-
-
 
