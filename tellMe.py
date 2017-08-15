@@ -13,6 +13,13 @@ parser.add_option("--index",   dest="index",   default = -99, help = "index",   
 
 (options, args) = parser.parse_args()
 
+# just conventions x <-> eta,     y <-> phi
+if options.ix != -99 :
+  options.ieta = options.ix
+if options.iy != -99 :
+  options.iphi = options.iy
+  
+  
 
 
 # cmsswId      dbID      hashedId     iphi      ieta   abs(ieta)    pos       FED        SM      TT(25)     iTT     strip(5)    Xtal     phiSM     etaSM
@@ -25,7 +32,7 @@ for line in open("EB.txt"):
     splitLine = line.split()
     if not li.startswith("#"):
         map_EB [ ( int(splitLine[4]) , int(splitLine[3]) ) ] = ( int(splitLine[2]),    # 0     hashedId
-                                                                 int(splitLine[0]),    # 1     dbID
+                                                                 int(splitLine[0]),    # 1     cmsswId
                                                                  #int(splitLine[6]),   # 
                                                                  int(splitLine[7]),    # 2     FED     
                                                                  int(splitLine[8]),    # 3     SM
@@ -65,13 +72,26 @@ for line in open("EE.txt"):
                                                                  )
  
 
+print " ~~~~~~~ "
 
 if options.iz == -1 or options.iz == 1 :
   print " EE " 
   
   print " fed = ", map_EE [ ( options.ix, options.iy, options.iz ) ] [5]
+  print " cmsswId = ", map_EE [ ( options.ix, options.iy, options.iz ) ] [1]
+  print " hashedId = ", map_EE [ ( options.ix, options.iy, options.iz ) ] [0]
   
   
+else :
+  
+  print " EB " 
+  
+  print " fed = ", map_EB [ ( options.ix, options.iy ) ] [2]
+  print " cmsswId = ", map_EB [ ( options.ix, options.iy ) ] [1]
+  print " hashedId = ", map_EB [ ( options.ix, options.iy ) ] [0]
+    
+  
+print " ~~~~~~~ "
   
   
   
