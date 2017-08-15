@@ -11,4 +11,11 @@ Code to plot pedestals extracted from laser sequence
     
     
     
+    python tellMe.py --iz 0 --ix -85 --iy 3
+    
+    python tellMe.py --iz 1 --ix 2 --iy 41
+    
+    python tellMe.py --iz -1 --ix 2 --iy 41
+    
+    
     
