@@ -88,7 +88,6 @@ if options.iz == -1 or options.iz == 1 :
   
   
 else :
-  
   print " EB " 
   
   print " fed = ", map_EB [ ( options.ix, options.iy ) ] [2]
