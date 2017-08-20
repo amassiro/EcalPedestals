@@ -61,9 +61,12 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   //  127
   
   
-  std::vector<float> ringPlus_ped;          std::vector<float> ringMinus_ped;
-  std::vector<int> ringPlus_pedcount;       std::vector<int> ringMinus_pedcount;  
+  //       ring       value-vs-time
+  std::map< int , std::vector<float> > ringPlus_ped;          std::map< int, std::vector<float> > ringMinus_ped;
+  std::map< int, std::vector<int> >   ringPlus_pedcount;      std::map< int, std::vector<int> >   ringMinus_pedcount;  
   
+  
+  std::vector<float> ring_time;
   
   
   
@@ -91,6 +94,35 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     T->Draw(toDraw.Data(), "", "goff");
     TGraph *gr_ped  = new TGraph(T->GetSelectedRows(), T->GetV3(), T->GetV1());  
     TGraph *gr_rms  = new TGraph(T->GetSelectedRows(), T->GetV3(), T->GetV2());  
+
+    if (ring_time.size() == 0) {
+      // get timing ranges
+      for (int itime = 0; itime < T->GetSelectedRows(); itime++) {
+        ring_time.push_back( T->GetV3()[itime] );
+        
+        std::vector
+        ringPlus_ped.push_back(0);
+        ringPlus_pedcount.push_back(0);
+        ringMinus_ped.push_back(0);
+        ringMinus_pedcount.push_back(0);
+      }
+    }
+    
+    if (z>0 || (z==0 && x>0) ) { 
+      for (int itime = 0; itime < std::min(ring_time.size(), T->GetSelectedRows()); itime++) {
+        ringPlus_pedcount.at(itime)  =  ringPlus_pedcount.at(itime)  + 1;
+        ringPlus_ped.at(itime)       =  gr_ped.Eval( ring_time.at(itime) ); //---- extrapolate
+      }
+    }
+    
+    
+    ringMinus_pedcount.at(itime) =  ringMinus_pedcount.at(itime) + 1;
+    
+    
+    
+    
+    delete gr_ped;
+    delete gr_rms;
     
     
     //---- style ----
