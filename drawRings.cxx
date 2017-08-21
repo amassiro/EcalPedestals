@@ -78,7 +78,7 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     
     if (!(index%1000)) std::cout << " [" << index << " :: " << 75848 << "]" << std::endl;
     
-    if (index%100) continue; //---- only 75848/100 ~ 700 xtals per ring, to test and speed up
+    if ((index < 61200 && index%100) || (index > 61200 && index%20)) continue; //---- only 75848/100 ~ 700 xtals per ring, to test and speed up
 //     if (index%50) continue; //---- only 75848/50 ~ 1400 xtals per ring, to test and speed up
     
     fedNumber = fed [index] - 601; //---- first fed for ECAL is 601
@@ -177,18 +177,25 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     gr_ped_ring_plus[iring] = new TGraph();
     gr_ped_ring_minus[iring] = new TGraph();
     
+    TString nameTitle = Form("ring + %d", iring);
+    gr_ped_ring_plus[iring]  -> SetTitle( nameTitle.Data() );
+    nameTitle = Form("ring - %d", iring);
+    gr_ped_ring_minus[iring] -> SetTitle( nameTitle.Data() );
+    
     for (int itime = 0; itime < ring_time.size(); itime++) {
       gr_ped_ring_plus[iring] -> SetPoint (itime, ring_time.at(itime),   ringPlus_ped[itime].at(iring)  ? ringPlus_ped[itime].at(iring)  / ringPlus_pedcount[itime].at(iring)  : 0 ) ;           
       gr_ped_ring_minus[iring] -> SetPoint (itime, ring_time.at(itime),  ringMinus_ped[itime].at(iring) ? ringMinus_ped[itime].at(iring) / ringMinus_pedcount[itime].at(iring) : 0 ) ;           
     }
     
     //---- style ----
+    gr_ped_ring_plus[iring]->SetFillColor  (0);               
     gr_ped_ring_plus[iring]->SetMarkerSize  (1);               
     gr_ped_ring_plus[iring]->SetMarkerStyle (24);              
     gr_ped_ring_plus[iring]->SetMarkerColor (iring % 50 +50);            
     gr_ped_ring_plus[iring]->SetLineWidth (1);                 
     gr_ped_ring_plus[iring]->SetLineColor (iring % 50 + 50);              
     
+    gr_ped_ring_minus[iring]->SetFillColor  (0);               
     gr_ped_ring_minus[iring]->SetMarkerSize  (1);               
     gr_ped_ring_minus[iring]->SetMarkerStyle (20);              
     gr_ped_ring_minus[iring]->SetMarkerColor (iring % 50 + 50);            
@@ -202,8 +209,13 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   
   TMultiGraph* mgr = new TMultiGraph();
   for (int iring = 0; iring < 127; iring++) {
+    
+    //---- plot only 1 every 10
+    if (iring % 10) continue;
+    
     mgr->Add(gr_ped_ring_plus[iring]);
     mgr->Add(gr_ped_ring_minus[iring]);
+    
   }
   
   
