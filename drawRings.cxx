@@ -2,6 +2,9 @@
 //---- plot pedestals
 //
 
+#include <algorithm>
+
+
 void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumber = -1) {
   
   std::cout << " runNumber = " << runNumber << std::endl;
@@ -69,10 +72,14 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   std::vector<float> ring_time;
   
   
-  
+//   for (int index = 0; index< 3000; index++) {
+    
   for (int index = 0; index< 75848; index++) {
-
+    
     if (!(index%1000)) std::cout << " [" << index << " :: " << 75848 << "]" << std::endl;
+    
+    if (index%100) continue; //---- only 75848/100 ~ 700 xtals per ring, to test and speed up
+//     if (index%50) continue; //---- only 75848/50 ~ 1400 xtals per ring, to test and speed up
     
     fedNumber = fed [index] - 601; //---- first fed for ECAL is 601
     
@@ -95,80 +102,129 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     TGraph *gr_ped  = new TGraph(T->GetSelectedRows(), T->GetV3(), T->GetV1());  
     TGraph *gr_rms  = new TGraph(T->GetSelectedRows(), T->GetV3(), T->GetV2());  
 
+    //---- just the first time
     if (ring_time.size() == 0) {
       // get timing ranges
       for (int itime = 0; itime < T->GetSelectedRows(); itime++) {
         ring_time.push_back( T->GetV3()[itime] );
         
-        std::vector
-        ringPlus_ped.push_back(0);
-        ringPlus_pedcount.push_back(0);
-        ringMinus_ped.push_back(0);
-        ringMinus_pedcount.push_back(0);
+        std::vector< float > temp;
+        std::vector< int > temp_int;
+        for (int iring = 0; iring < 127; iring++) {
+          temp.push_back(0); 
+          temp_int.push_back(0); 
+        }
+        
+        ringPlus_ped[itime] = temp;
+        ringPlus_pedcount[itime] = temp_int;
+        ringMinus_ped[itime] = temp;
+        ringMinus_pedcount[itime] = temp_int;
       }
+    }
+    
+    //---- and the rest of the times do this
+    
+    int iring = 0;
+    
+    if (z != 0) {
+      //---- EE
+      float dx = x - 50;
+      float dy = y - 50;
+      
+      float ring = sqrt( dx*dx + dy*dy );
+      
+//       42 -  iter
+      iring = 41 - ( round(ring) - 11)  + 85;  //---- 12 [ = (62 - 50 - 1) from the 2D plot] is the first ring
+//       iring = round(ring) - 11 + 85;  //---- 12 [ = (62 - 50 - 1) from the 2D plot] is the first ring
+      //  +85, since the first 85 are for EB
+    }
+    else {
+      //---- EB      
+      iring = abs( x ) - 1 ;
+    }
+    
+    
+    int totalTime = 0;
+    if (ring_time.size() > T->GetSelectedRows()) {
+      totalTime = T->GetSelectedRows();
+    }
+    else {
+      totalTime = ring_time.size();      
     }
     
     if (z>0 || (z==0 && x>0) ) { 
-      for (int itime = 0; itime < std::min(ring_time.size(), T->GetSelectedRows()); itime++) {
-        ringPlus_pedcount.at(itime)  =  ringPlus_pedcount.at(itime)  + 1;
-        ringPlus_ped.at(itime)       =  gr_ped.Eval( ring_time.at(itime) ); //---- extrapolate
+      for (int itime = 0; itime < totalTime; itime++) {
+        ringPlus_pedcount[itime].at(iring)  =  ringPlus_pedcount[itime].at(iring)  + 1;
+        ringPlus_ped[itime].at(iring)       =  ringPlus_ped[itime].at(iring) + gr_ped->Eval( ring_time.at(itime) ); //---- extrapolate
       }
     }
-    
-    
-    ringMinus_pedcount.at(itime) =  ringMinus_pedcount.at(itime) + 1;
-    
-    
-    
-    
+    else {
+      for (int itime = 0; itime < totalTime; itime++) {
+        ringMinus_pedcount[itime].at(iring)  =  ringMinus_pedcount[itime].at(iring)  + 1;
+        ringMinus_ped[itime].at(iring)       =  ringMinus_ped[itime].at(iring) + gr_ped->Eval( ring_time.at(itime) ); //---- extrapolate
+      }
+    }
+  
     delete gr_ped;
     delete gr_rms;
     
+  }
+  
+  
+  
+  for (int iring = 0; iring < 127; iring++) {
+    
+    gr_ped_ring_plus[iring] = new TGraph();
+    gr_ped_ring_minus[iring] = new TGraph();
+    
+    for (int itime = 0; itime < ring_time.size(); itime++) {
+      gr_ped_ring_plus[iring] -> SetPoint (itime, ring_time.at(itime),   ringPlus_ped[itime].at(iring)  ? ringPlus_ped[itime].at(iring)  / ringPlus_pedcount[itime].at(iring)  : 0 ) ;           
+      gr_ped_ring_minus[iring] -> SetPoint (itime, ring_time.at(itime),  ringMinus_ped[itime].at(iring) ? ringMinus_ped[itime].at(iring) / ringMinus_pedcount[itime].at(iring) : 0 ) ;           
+    }
     
     //---- style ----
+    gr_ped_ring_plus[iring]->SetMarkerSize  (1);               
+    gr_ped_ring_plus[iring]->SetMarkerStyle (24);              
+    gr_ped_ring_plus[iring]->SetMarkerColor (iring % 50 +50);            
+    gr_ped_ring_plus[iring]->SetLineWidth (1);                 
+    gr_ped_ring_plus[iring]->SetLineColor (iring % 50 + 50);              
     
-    gr_ped->SetMarkerSize  (1);               
-    gr_ped->SetMarkerStyle (24);              
-    gr_ped->SetMarkerColor (kRed);            
-    gr_ped->SetLineWidth (1);                 
-    gr_ped->SetLineColor (kRed);              
-    
-    gr_rms->SetMarkerSize  (1);               
-    gr_rms->SetMarkerStyle (24);              
-    gr_rms->SetMarkerColor (kBlue);            
-    gr_rms->SetLineWidth (1);                 
-    gr_rms->SetLineColor (kBlue);              
-    
+    gr_ped_ring_minus[iring]->SetMarkerSize  (1);               
+    gr_ped_ring_minus[iring]->SetMarkerStyle (20);              
+    gr_ped_ring_minus[iring]->SetMarkerColor (iring % 50 + 50);            
+    gr_ped_ring_minus[iring]->SetLineWidth (1);                 
+    gr_ped_ring_minus[iring]->SetLineColor (iring % 50 + 50);              
     //---- style (end) ----
     
     
-    gr_ped->Draw("AP");
-    gr_ped->GetYaxis()->SetTitle("ped ADC");
-    gr_ped->GetXaxis()->SetTitle("time");
-    gr_ped->GetXaxis()->SetTimeDisplay(1);
-    gr_ped->GetXaxis()->SetNdivisions(-503);
-    gr_ped->GetXaxis()->SetTimeFormat("%Y-%m-%d %H:%M");
-    gr_ped->GetXaxis()->SetTimeOffset(0,"gmt");
-    ccPed->SetGrid();
-    
-    
-    
-    gr_rms->Draw("AP");
-    gr_rms->GetYaxis()->SetTitle("rms ADC");
-    gr_rms->GetXaxis()->SetTitle("time");
-    gr_rms->GetXaxis()->SetTimeDisplay(1);
-    gr_rms->GetXaxis()->SetNdivisions(-503);
-    gr_rms->GetXaxis()->SetTimeFormat("%Y-%m-%d %H:%M");
-    gr_rms->GetXaxis()->SetTimeOffset(0,"gmt");
-    ccRms->SetGrid();
-    
-    TString namePlot = Form ("plot/ped_xyz_%d_%d_%d.png",x,y,z);
-    ccPed->SaveAs(namePlot.Data());
-    
-    namePlot = Form ("plot/rms_xyz_%d_%d_%d.png",x,y,z);
-    ccRms->SaveAs(namePlot.Data());
-    
   }
+  
+  
+  TMultiGraph* mgr = new TMultiGraph();
+  for (int iring = 0; iring < 127; iring++) {
+    mgr->Add(gr_ped_ring_plus[iring]);
+    mgr->Add(gr_ped_ring_minus[iring]);
+  }
+  
+  
+  mgr->Draw("APL");
+  mgr->GetYaxis()->SetTitle("ped ADC");
+  mgr->GetXaxis()->SetTitle("time");
+  mgr->GetXaxis()->SetTimeDisplay(1);
+  mgr->GetXaxis()->SetNdivisions(-503);
+  mgr->GetXaxis()->SetTimeFormat("%Y-%m-%d %H:%M");
+  mgr->GetXaxis()->SetTimeOffset(0,"gmt");
+  ccPed->SetGrid();
+  
+  ccPed->BuildLegend();
+  
+  
+  
+  TString namePlot = Form ("plot/ped_xyz_all_%d.png",runNumber);
+  ccPed->SaveAs(namePlot.Data());
+  
+  
+  
   
 }
 

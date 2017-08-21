@@ -20,6 +20,12 @@ Code to plot pedestals extracted from laser sequence
     python tellMe.py --iz -1 --ix 2 --iy 41
     
     
+    
+    
+    r00t drawRings.cxx\(\"ana_ped_2016-2017.root\",283270\)
+    
+    
+    
 ROOT Tree content
 
     T rootuple content: 
