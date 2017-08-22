@@ -93,6 +93,9 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   TCanvas* ccRms = new TCanvas ("ccRms","",1600,600);
   TCanvas* ccPed = new TCanvas ("ccPed","",1600,600);
   
+  ccPed->SetRightMargin(0.3);
+  ccRms->SetRightMargin(0.3);
+  
   
   TGraph* gr_ped_ring_plus  [ 127 ];
   TGraph* gr_ped_ring_minus [ 127 ];
@@ -229,21 +232,22 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     gr_ped_ring_plus[iring]->SetMarkerSize  (1);               
     gr_ped_ring_plus[iring]->SetMarkerStyle (24);              
 //     gr_ped_ring_plus[iring]->SetMarkerColor (iring % 50 +50);    
-    gr_ped_ring_plus[iring]->SetMarkerColor (GetColorFromPalette ( iring, 127, 0) );        
+    gr_ped_ring_plus[iring]->SetMarkerColor (GetColorFromPalette ( 127 - iring, 127, 0) );        
     gr_ped_ring_plus[iring]->SetLineWidth (1);                 
-    gr_ped_ring_plus[iring]->SetLineColor (GetColorFromPalette ( iring, 127, 0) );    
+    gr_ped_ring_plus[iring]->SetLineColor (GetColorFromPalette ( 127 - iring, 127, 0) );    
     
     gr_ped_ring_minus[iring]->SetFillColor  (0);               
     gr_ped_ring_minus[iring]->SetMarkerSize  (1);               
     gr_ped_ring_minus[iring]->SetMarkerStyle (20);              
-    gr_ped_ring_minus[iring]->SetMarkerColor (GetColorFromPalette ( iring, 127, 0) );    
+    gr_ped_ring_minus[iring]->SetMarkerColor (GetColorFromPalette ( 127 - iring, 127, 0) );    
     gr_ped_ring_minus[iring]->SetLineWidth (1);                 
-    gr_ped_ring_minus[iring]->SetLineColor (GetColorFromPalette ( iring, 127, 0) );    
+    gr_ped_ring_minus[iring]->SetLineColor (GetColorFromPalette ( 127 - iring, 127, 0) );    
     //---- style (end) ----
     
     
   }
   
+  TLegend* leg_all = new TLegend(0.71,0.10,0.99,0.90);
   
   TMultiGraph* mgr = new TMultiGraph();
   for (int iring = 0; iring < 127; iring++) {
@@ -253,6 +257,9 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     
     mgr->Add(gr_ped_ring_plus[iring]);
     mgr->Add(gr_ped_ring_minus[iring]);
+    
+    leg_all->AddEntry(gr_ped_ring_plus[iring], gr_ped_ring_plus[iring]->GetTitle(), "pl");
+    leg_all->AddEntry(gr_ped_ring_minus[iring],gr_ped_ring_minus[iring]->GetTitle(),"pl");
     
   }
   
@@ -266,7 +273,9 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   mgr->GetXaxis()->SetTimeOffset(0,"gmt");
   ccPed->SetGrid();
   
-  ccPed->BuildLegend();
+  leg_all->Draw();
+  
+//   ccPed->BuildLegend();
   
   
   
@@ -312,13 +321,19 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   
   
   
-  TCanvas* ccPedEE = new TCanvas ("ccPedEE","",1600,600);
+  TCanvas* ccPedEE = new TCanvas ("ccPedEE","EE",1600,600);
+  ccPedEE->SetRightMargin(0.3);
+  
+  TLegend* leg_EE = new TLegend(0.71,0.10,0.99,0.90);
   
   TMultiGraph* mgr_EE = new TMultiGraph();
   for (int iring = 86; iring < 127; iring++) {
     
     mgr_EE->Add(gr_ped_ring_plus[iring]);
     mgr_EE->Add(gr_ped_ring_minus[iring]);
+    
+    leg_EE->AddEntry(gr_ped_ring_plus[iring], gr_ped_ring_plus[iring]->GetTitle(), "pl");
+    leg_EE->AddEntry(gr_ped_ring_minus[iring],gr_ped_ring_minus[iring]->GetTitle(),"pl");
     
   }
   
@@ -331,20 +346,28 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   mgr_EE->GetXaxis()->SetTimeOffset(0,"gmt");
   ccPedEE->SetGrid();
   
-  ccPedEE->BuildLegend();
+  leg_EE->Draw();
+  
+//   ccPedEE->BuildLegend();
   
   
   
   
   
   
-  TCanvas* ccPedEB = new TCanvas ("ccPedEB","",1600,600);
+  TCanvas* ccPedEB = new TCanvas ("ccPedEB","EB",1600,600);
+  ccPedEB->SetRightMargin(0.3);
+  
+  TLegend* leg_EB = new TLegend(0.71,0.10,0.99,0.90);
   
   TMultiGraph* mgr_EB = new TMultiGraph();
   for (int iring = 0; iring < 86; iring++) {
     
     mgr_EB->Add(gr_ped_ring_plus[iring]);
     mgr_EB->Add(gr_ped_ring_minus[iring]);
+    
+    leg_EB->AddEntry(gr_ped_ring_plus[iring], gr_ped_ring_plus[iring]->GetTitle(), "pl");
+    leg_EB->AddEntry(gr_ped_ring_minus[iring],gr_ped_ring_minus[iring]->GetTitle(),"pl");
     
   }
   
@@ -357,7 +380,9 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   mgr_EB->GetXaxis()->SetTimeOffset(0,"gmt");
   ccPedEB->SetGrid();
   
-  ccPedEB->BuildLegend();
+  leg_EB->Draw();
+  
+//   ccPedEB->BuildLegend();
   
   
   
