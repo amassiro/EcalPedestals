@@ -238,6 +238,42 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   
   
   
+  
+  //---- check rings 
+  TCanvas* ccRingEE = new TCanvas ("ccRingEE","",1200,600);
+  
+  TH2F* histo_EE = new TH2F ("histo_EE", "rings" ,  200, 0.5, 200.5,  100, 0.5, 100.5);
+  
+  for (int index = 0; index< 75848; index++) {
+    PedChan->GetEntry(index);
+    
+    if (index < 61200) continue;
+//     if (z == 0) continue; //---- skip the EB
+
+    int iring = 0;
+    
+    //---- EE
+    float dx = x - 50;
+    float dy = y - 50;
+    
+    float ring = sqrt( dx*dx + dy*dy );
+    
+    //       42 -  iter
+    iring = 41 - ( round(ring) - 11)  + 85;  //---- 12 [ = (62 - 50 - 1) from the 2D plot] is the first ring
+    
+    
+    histo_EE->Fill(x + 100*(z>0), y, iring);
+    
+  }
+  
+  histo_EE->Draw("colz text");
+  
+  
+  
+  
+  
+  
+  
 }
 
 
