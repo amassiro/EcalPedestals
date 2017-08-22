@@ -5,6 +5,42 @@
 #include <algorithm>
 
 
+int GetColorFromPalette ( TH2 * histo, Double_t z ) {
+  /// http://root.cern.ch/phpBB3/viewtopic.php?f=12&t=4101&p=16258 -> See THistPainter::PaintColorLevels()
+  Int_t ncolors  = gStyle->GetNumberOfColors() ;
+  Int_t ndiv = histo->GetContour() ;
+  if (ndiv == 0 ) { ndiv = gStyle->GetNumberContours() ; }
+  Int_t ndivz = TMath::Abs(ndiv) ;
+  Double_t zmin = histo->GetMinimum(), zmax = histo->GetMaximum() ;
+  Double_t dz = zmax - zmin ;
+  Double_t scale = ndivz/dz ;
+  Int_t color = Int_t(0.01+(z-zmin)*scale) ;
+  Int_t theColor = Int_t((color+0.99)*Float_t(ncolors)/Float_t(ndivz)) ;
+  if (theColor > ncolors-1) theColor = ncolors-1 ;  
+  // printf ("\ntheColor=%d",theColor) ;
+  return (gStyle->GetColorPalette(theColor)) ;
+}
+
+
+
+int GetColorFromPalette ( int iter, int max, int min=0) {
+  /// http://root.cern.ch/phpBB3/viewtopic.php?f=12&t=4101&p=16258 -> See THistPainter::PaintColorLevels()
+  Int_t ncolors  = gStyle->GetNumberOfColors() ;
+  Int_t ndiv = max - min;
+  if (ndiv == 0 ) { ndiv = gStyle->GetNumberContours() ; }
+  Int_t ndivz = TMath::Abs(ndiv) ;
+  Double_t zmin = min, zmax = max ;
+  Double_t dz = zmax - zmin ;
+  Double_t scale = ndivz/dz ;
+  Int_t color = Int_t(0.01+(iter-zmin)*scale) ;
+  Int_t theColor = Int_t((color+0.99)*Float_t(ncolors)/Float_t(ndivz)) ;
+  if (theColor > ncolors-1) theColor = ncolors-1 ;  
+  return (gStyle->GetColorPalette(theColor)) ;
+}
+
+
+
+
 void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumber = -1) {
   
   std::cout << " runNumber = " << runNumber << std::endl;
@@ -128,8 +164,8 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     
     if (z != 0) {
       //---- EE
-      float dx = x - 50;
-      float dy = y - 50;
+      float dx = x - 50.5;
+      float dy = y - 50.5;
       
       float ring = sqrt( dx*dx + dy*dy );
       
@@ -191,16 +227,17 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     gr_ped_ring_plus[iring]->SetFillColor  (0);               
     gr_ped_ring_plus[iring]->SetMarkerSize  (1);               
     gr_ped_ring_plus[iring]->SetMarkerStyle (24);              
-    gr_ped_ring_plus[iring]->SetMarkerColor (iring % 50 +50);            
+//     gr_ped_ring_plus[iring]->SetMarkerColor (iring % 50 +50);    
+    gr_ped_ring_plus[iring]->SetMarkerColor (GetColorFromPalette ( iring, 127, 0) );        
     gr_ped_ring_plus[iring]->SetLineWidth (1);                 
-    gr_ped_ring_plus[iring]->SetLineColor (iring % 50 + 50);              
+    gr_ped_ring_plus[iring]->SetLineColor (GetColorFromPalette ( iring, 127, 0) );    
     
     gr_ped_ring_minus[iring]->SetFillColor  (0);               
     gr_ped_ring_minus[iring]->SetMarkerSize  (1);               
     gr_ped_ring_minus[iring]->SetMarkerStyle (20);              
-    gr_ped_ring_minus[iring]->SetMarkerColor (iring % 50 + 50);            
+    gr_ped_ring_minus[iring]->SetMarkerColor (GetColorFromPalette ( iring, 127, 0) );    
     gr_ped_ring_minus[iring]->SetLineWidth (1);                 
-    gr_ped_ring_minus[iring]->SetLineColor (iring % 50 + 50);              
+    gr_ped_ring_minus[iring]->SetLineColor (GetColorFromPalette ( iring, 127, 0) );    
     //---- style (end) ----
     
     
@@ -253,8 +290,8 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     int iring = 0;
     
     //---- EE
-    float dx = x - 50;
-    float dy = y - 50;
+    float dx = x - 50.5;
+    float dy = y - 50.5;
     
     float ring = sqrt( dx*dx + dy*dy );
     
@@ -271,6 +308,55 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   
   
   
+  
+  
+  
+  TCanvas* ccPedEE = new TCanvas ("ccPedEE","",1600,600);
+  
+  TMultiGraph* mgr_EE = new TMultiGraph();
+  for (int iring = 86; iring < 127; iring++) {
+    
+    mgr_EE->Add(gr_ped_ring_plus[iring]);
+    mgr_EE->Add(gr_ped_ring_minus[iring]);
+    
+  }
+  
+  mgr_EE->Draw("APL");
+  mgr_EE->GetYaxis()->SetTitle("ped ADC");
+  mgr_EE->GetXaxis()->SetTitle("time");
+  mgr_EE->GetXaxis()->SetTimeDisplay(1);
+  mgr_EE->GetXaxis()->SetNdivisions(-503);
+  mgr_EE->GetXaxis()->SetTimeFormat("%Y-%m-%d %H:%M");
+  mgr_EE->GetXaxis()->SetTimeOffset(0,"gmt");
+  ccPedEE->SetGrid();
+  
+  ccPedEE->BuildLegend();
+  
+  
+  
+  
+  
+  
+  TCanvas* ccPedEB = new TCanvas ("ccPedEB","",1600,600);
+  
+  TMultiGraph* mgr_EB = new TMultiGraph();
+  for (int iring = 0; iring < 86; iring++) {
+    
+    mgr_EB->Add(gr_ped_ring_plus[iring]);
+    mgr_EB->Add(gr_ped_ring_minus[iring]);
+    
+  }
+  
+  mgr_EB->Draw("APL");
+  mgr_EB->GetYaxis()->SetTitle("ped ADC");
+  mgr_EB->GetXaxis()->SetTitle("time");
+  mgr_EB->GetXaxis()->SetTimeDisplay(1);
+  mgr_EB->GetXaxis()->SetNdivisions(-503);
+  mgr_EB->GetXaxis()->SetTimeFormat("%Y-%m-%d %H:%M");
+  mgr_EB->GetXaxis()->SetTimeOffset(0,"gmt");
+  ccPedEB->SetGrid();
+  
+  ccPedEB->BuildLegend();
   
   
   
