@@ -22,9 +22,10 @@ int GetColorFromPalette ( TH2 * histo, Double_t z ) {
 }
 
 
-
+// https://root-forum.cern.ch/t/th2-col-above-lego/16180
 int GetColorFromPalette ( int iter, int max, int min=0) {
   /// http://root.cern.ch/phpBB3/viewtopic.php?f=12&t=4101&p=16258 -> See THistPainter::PaintColorLevels()
+  //  https://root-forum.cern.ch/t/th2-col-above-lego/16180
   Int_t ncolors  = gStyle->GetNumberOfColors() ;
   Int_t ndiv = max - min;
   if (ndiv == 0 ) { ndiv = gStyle->GetNumberContours() ; }
