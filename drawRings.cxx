@@ -124,7 +124,7 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     
     if (!(index%1000)) std::cout << " [" << index << " :: " << 75848 << "]" << std::endl;
     
-    if ((index < 61200 && index%100) || (index > 61200 && index%20)) continue; //---- only 75848/100 ~ 700 xtals per ring, to test and speed up
+    if ((index <= 61200 && index%100) || (index > 61200 && index%20)) continue; //---- only 75848/100 ~ 700 xtals per ring, to test and speed up
 //     if (index%50) continue; //---- only 75848/50 ~ 1400 xtals per ring, to test and speed up
     
     fedNumber = fed [index] - 601; //---- first fed for ECAL is 601
@@ -178,7 +178,7 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     
     int iring = 0;
     
-    if (z != 0) {
+    if (index > 61200) {
       //---- EE
       float dx = x - 50.5;
       float dy = y - 50.5;
@@ -204,24 +204,28 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
       totalTime = ring_time.size();      
     }
     
-    if (z>0 || (z==0 && x>0) ) { 
+    if (z>0 || (z==0 && x>0 && index <= 61200) ) { 
       for (int itime = 0; itime < totalTime; itime++) {
-        ringPlus_pedcount[itime].at(iring)  =  ringPlus_pedcount[itime].at(iring)  + 1;
-        ringPlus_ped[itime].at(iring)       =  ringPlus_ped[itime].at(iring) + gr_ped->Eval( ring_time.at(itime) ); //---- extrapolate
-
-        ringPlus_rmscount[itime].at(iring)  =  ringPlus_rmscount[itime].at(iring)  + 1;
-        ringPlus_rms[itime].at(iring)       =  ringPlus_rms[itime].at(iring) + gr_rms->Eval( ring_time.at(itime) ); //---- extrapolate
-        
+        if (gr_ped->Eval( ring_time.at(itime) ) > 0 ) {
+          ringPlus_pedcount[itime].at(iring)  =  ringPlus_pedcount[itime].at(iring)  + 1;
+          ringPlus_ped[itime].at(iring)       =  ringPlus_ped[itime].at(iring) + gr_ped->Eval( ring_time.at(itime) ); //---- extrapolate
+        }
+        if (gr_rms->Eval( ring_time.at(itime) ) > 0 ) {
+          ringPlus_rmscount[itime].at(iring)  =  ringPlus_rmscount[itime].at(iring)  + 1;
+          ringPlus_rms[itime].at(iring)       =  ringPlus_rms[itime].at(iring) + gr_rms->Eval( ring_time.at(itime) ); //---- extrapolate
+        }
       }
     }
     else {
       for (int itime = 0; itime < totalTime; itime++) {
-        ringMinus_pedcount[itime].at(iring)  =  ringMinus_pedcount[itime].at(iring)  + 1;
-        ringMinus_ped[itime].at(iring)       =  ringMinus_ped[itime].at(iring) + gr_ped->Eval( ring_time.at(itime) ); //---- extrapolate
-
-        ringMinus_rmscount[itime].at(iring)  =  ringMinus_rmscount[itime].at(iring)  + 1;
-        ringMinus_rms[itime].at(iring)       =  ringMinus_rms[itime].at(iring) + gr_rms->Eval( ring_time.at(itime) ); //---- extrapolate
-        
+        if (gr_ped->Eval( ring_time.at(itime) ) > 0 ) {
+          ringMinus_pedcount[itime].at(iring)  =  ringMinus_pedcount[itime].at(iring)  + 1;
+          ringMinus_ped[itime].at(iring)       =  ringMinus_ped[itime].at(iring) + gr_ped->Eval( ring_time.at(itime) ); //---- extrapolate
+        }
+        if (gr_rms->Eval( ring_time.at(itime) ) > 0 ) {
+          ringMinus_rmscount[itime].at(iring)  =  ringMinus_rmscount[itime].at(iring)  + 1;
+          ringMinus_rms[itime].at(iring)       =  ringMinus_rms[itime].at(iring) + gr_rms->Eval( ring_time.at(itime) ); //---- extrapolate
+        }
       }
     }
   
@@ -342,7 +346,7 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   for (int index = 0; index< 75848; index++) {
     PedChan->GetEntry(index);
     
-    if (index < 61200) continue;
+    if (index <= 61200) continue;
 //     if (z == 0) continue; //---- skip the EB
 
     int iring = 0;
