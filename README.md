@@ -1,5 +1,9 @@
 # EcalPedestals
 
+Where:
+
+    /home/amassiro/Cern/Code/ECAL/EcalPedestals
+    
 Code to plot pedestals extracted from laser sequence
 
     T->Draw("ped[1] : time[2]", "run==283270 && ped[1]>50", "box")

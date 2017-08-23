@@ -90,8 +90,8 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   //---- decide which crystal and fed we will display
   T->GetEntry(0);
   
-  TCanvas* ccRms = new TCanvas ("ccRms","",1600,600);
-  TCanvas* ccPed = new TCanvas ("ccPed","",1600,600);
+  TCanvas* ccRms = new TCanvas ("ccRms","Noise",1600,600);
+  TCanvas* ccPed = new TCanvas ("ccPed","Pedestal",1600,600);
   
   ccPed->SetRightMargin(0.3);
   ccRms->SetRightMargin(0.3);
@@ -99,6 +99,10 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   
   TGraph* gr_ped_ring_plus  [ 127 ];
   TGraph* gr_ped_ring_minus [ 127 ];
+
+  TGraph* gr_rms_ring_plus  [ 127 ];
+  TGraph* gr_rms_ring_minus [ 127 ];
+
   //  85 + (50-11+3) = 
   //  85 + 42 = 
   //  127
@@ -108,6 +112,8 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   std::map< int , std::vector<float> > ringPlus_ped;          std::map< int, std::vector<float> > ringMinus_ped;
   std::map< int, std::vector<int> >   ringPlus_pedcount;      std::map< int, std::vector<int> >   ringMinus_pedcount;  
   
+  std::map< int , std::vector<float> > ringPlus_rms;          std::map< int, std::vector<float> > ringMinus_rms;
+  std::map< int, std::vector<int> >   ringPlus_rmscount;      std::map< int, std::vector<int> >   ringMinus_rmscount;  
   
   std::vector<float> ring_time;
   
@@ -159,6 +165,12 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
         ringPlus_pedcount[itime] = temp_int;
         ringMinus_ped[itime] = temp;
         ringMinus_pedcount[itime] = temp_int;
+
+        ringPlus_rms[itime] = temp;
+        ringPlus_rmscount[itime] = temp_int;
+        ringMinus_rms[itime] = temp;
+        ringMinus_rmscount[itime] = temp_int;
+        
       }
     }
     
@@ -196,12 +208,20 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
       for (int itime = 0; itime < totalTime; itime++) {
         ringPlus_pedcount[itime].at(iring)  =  ringPlus_pedcount[itime].at(iring)  + 1;
         ringPlus_ped[itime].at(iring)       =  ringPlus_ped[itime].at(iring) + gr_ped->Eval( ring_time.at(itime) ); //---- extrapolate
+
+        ringPlus_rmscount[itime].at(iring)  =  ringPlus_rmscount[itime].at(iring)  + 1;
+        ringPlus_rms[itime].at(iring)       =  ringPlus_rms[itime].at(iring) + gr_rms->Eval( ring_time.at(itime) ); //---- extrapolate
+        
       }
     }
     else {
       for (int itime = 0; itime < totalTime; itime++) {
         ringMinus_pedcount[itime].at(iring)  =  ringMinus_pedcount[itime].at(iring)  + 1;
         ringMinus_ped[itime].at(iring)       =  ringMinus_ped[itime].at(iring) + gr_ped->Eval( ring_time.at(itime) ); //---- extrapolate
+
+        ringMinus_rmscount[itime].at(iring)  =  ringMinus_rmscount[itime].at(iring)  + 1;
+        ringMinus_rms[itime].at(iring)       =  ringMinus_rms[itime].at(iring) + gr_rms->Eval( ring_time.at(itime) ); //---- extrapolate
+        
       }
     }
   
@@ -216,15 +236,27 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     
     gr_ped_ring_plus[iring] = new TGraph();
     gr_ped_ring_minus[iring] = new TGraph();
+
+    gr_rms_ring_plus[iring] = new TGraph();
+    gr_rms_ring_minus[iring] = new TGraph();
     
     TString nameTitle = Form("ring + %d", iring);
     gr_ped_ring_plus[iring]  -> SetTitle( nameTitle.Data() );
     nameTitle = Form("ring - %d", iring);
     gr_ped_ring_minus[iring] -> SetTitle( nameTitle.Data() );
+
+    nameTitle = Form("ring + %d", iring);
+    gr_rms_ring_plus[iring]  -> SetTitle( nameTitle.Data() );
+    nameTitle = Form("ring - %d", iring);
+    gr_rms_ring_minus[iring] -> SetTitle( nameTitle.Data() );
     
     for (int itime = 0; itime < ring_time.size(); itime++) {
       gr_ped_ring_plus[iring] -> SetPoint (itime, ring_time.at(itime),   ringPlus_ped[itime].at(iring)  ? ringPlus_ped[itime].at(iring)  / ringPlus_pedcount[itime].at(iring)  : 0 ) ;           
       gr_ped_ring_minus[iring] -> SetPoint (itime, ring_time.at(itime),  ringMinus_ped[itime].at(iring) ? ringMinus_ped[itime].at(iring) / ringMinus_pedcount[itime].at(iring) : 0 ) ;           
+
+      gr_rms_ring_plus[iring] -> SetPoint (itime, ring_time.at(itime),   ringPlus_rms[itime].at(iring)  ? ringPlus_rms[itime].at(iring)  / ringPlus_rmscount[itime].at(iring)  : 0 ) ;           
+      gr_rms_ring_minus[iring] -> SetPoint (itime, ring_time.at(itime),  ringMinus_rms[itime].at(iring) ? ringMinus_rms[itime].at(iring) / ringMinus_rmscount[itime].at(iring) : 0 ) ;           
+      
     }
     
     //---- style ----
@@ -242,12 +274,28 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     gr_ped_ring_minus[iring]->SetMarkerColor (GetColorFromPalette ( 127 - iring, 127, 0) );    
     gr_ped_ring_minus[iring]->SetLineWidth (1);                 
     gr_ped_ring_minus[iring]->SetLineColor (GetColorFromPalette ( 127 - iring, 127, 0) );    
+
+
+    gr_rms_ring_plus[iring]->SetFillColor  (0);               
+    gr_rms_ring_plus[iring]->SetMarkerSize  (1);               
+    gr_rms_ring_plus[iring]->SetMarkerStyle (25);              
+    gr_rms_ring_plus[iring]->SetMarkerColor (GetColorFromPalette ( 127 - iring, 127, 0) );        
+    gr_rms_ring_plus[iring]->SetLineWidth (1);                 
+    gr_rms_ring_plus[iring]->SetLineColor (GetColorFromPalette ( 127 - iring, 127, 0) );    
+    
+    gr_rms_ring_minus[iring]->SetFillColor  (0);               
+    gr_rms_ring_minus[iring]->SetMarkerSize  (1);               
+    gr_rms_ring_minus[iring]->SetMarkerStyle (21);              
+    gr_rms_ring_minus[iring]->SetMarkerColor (GetColorFromPalette ( 127 - iring, 127, 0) );    
+    gr_rms_ring_minus[iring]->SetLineWidth (1);                 
+    gr_rms_ring_minus[iring]->SetLineColor (GetColorFromPalette ( 127 - iring, 127, 0) );    
+   
     //---- style (end) ----
     
     
   }
   
-  TLegend* leg_all = new TLegend(0.71,0.10,0.99,0.90);
+  TLegend* leg_ped_all = new TLegend(0.71,0.10,0.99,0.90);
   
   TMultiGraph* mgr = new TMultiGraph();
   for (int iring = 0; iring < 127; iring++) {
@@ -258,8 +306,8 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
     mgr->Add(gr_ped_ring_plus[iring]);
     mgr->Add(gr_ped_ring_minus[iring]);
     
-    leg_all->AddEntry(gr_ped_ring_plus[iring], gr_ped_ring_plus[iring]->GetTitle(), "pl");
-    leg_all->AddEntry(gr_ped_ring_minus[iring],gr_ped_ring_minus[iring]->GetTitle(),"pl");
+    leg_ped_all->AddEntry(gr_ped_ring_plus[iring], gr_ped_ring_plus[iring]->GetTitle(), "pl");
+    leg_ped_all->AddEntry(gr_ped_ring_minus[iring],gr_ped_ring_minus[iring]->GetTitle(),"pl");
     
   }
   
@@ -273,7 +321,7 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   mgr->GetXaxis()->SetTimeOffset(0,"gmt");
   ccPed->SetGrid();
   
-  leg_all->Draw();
+  leg_ped_all->Draw();
   
 //   ccPed->BuildLegend();
   
@@ -383,6 +431,116 @@ void drawRings(std::string nameInputFile = "ana_ped_2016-2017.root", int runNumb
   leg_EB->Draw();
   
 //   ccPedEB->BuildLegend();
+  
+  
+  
+  
+  //---- RMS ----
+  
+  ccRms->cd();
+  
+  TLegend* leg_rms_all = new TLegend(0.71,0.10,0.99,0.90);
+  
+  TMultiGraph* mgr_rms = new TMultiGraph();
+  for (int iring = 0; iring < 127; iring++) {
+    
+    //---- plot only 1 every 10
+    if (iring % 10) continue;
+    
+    mgr_rms->Add(gr_rms_ring_plus[iring]);
+    mgr_rms->Add(gr_rms_ring_minus[iring]);
+    
+    leg_rms_all->AddEntry(gr_rms_ring_plus[iring], gr_rms_ring_plus[iring]->GetTitle(), "pl");
+    leg_rms_all->AddEntry(gr_rms_ring_minus[iring],gr_rms_ring_minus[iring]->GetTitle(),"pl");
+    
+  }
+  
+  
+  mgr_rms->Draw("APL");
+  mgr_rms->GetYaxis()->SetTitle("rms ADC");
+  mgr_rms->GetXaxis()->SetTitle("time");
+  mgr_rms->GetXaxis()->SetTimeDisplay(1);
+  mgr_rms->GetXaxis()->SetNdivisions(-503);
+  mgr_rms->GetXaxis()->SetTimeFormat("%Y-%m-%d %H:%M");
+  mgr_rms->GetXaxis()->SetTimeOffset(0,"gmt");
+  ccRms->SetGrid();
+  
+  leg_rms_all->Draw();
+  
+  //   ccPed->BuildLegend();
+  
+  
+  
+  namePlot = Form ("plot/rms_xyz_all_%d.png",runNumber);
+  ccRms->SaveAs(namePlot.Data());
+  
+  
+  
+  
+  
+  
+  TCanvas* ccPedEE_rms = new TCanvas ("ccPedEE_rms","EE noise",1600,600);
+  ccPedEE_rms->SetRightMargin(0.3);
+  
+  TLegend* leg_EE_rms = new TLegend(0.71,0.10,0.99,0.90);
+  
+  TMultiGraph* mgr_rms_EE = new TMultiGraph();
+  for (int iring = 86; iring < 127; iring++) {
+    
+    mgr_rms_EE->Add(gr_rms_ring_plus[iring]);
+    mgr_rms_EE->Add(gr_rms_ring_minus[iring]);
+    
+    leg_EE_rms->AddEntry(gr_rms_ring_plus[iring], gr_rms_ring_plus[iring]->GetTitle(), "pl");
+    leg_EE_rms->AddEntry(gr_rms_ring_minus[iring],gr_rms_ring_minus[iring]->GetTitle(),"pl");
+    
+  }
+  
+  mgr_rms_EE->Draw("APL");
+  mgr_rms_EE->GetYaxis()->SetTitle("rms ADC");
+  mgr_rms_EE->GetXaxis()->SetTitle("time");
+  mgr_rms_EE->GetXaxis()->SetTimeDisplay(1);
+  mgr_rms_EE->GetXaxis()->SetNdivisions(-503);
+  mgr_rms_EE->GetXaxis()->SetTimeFormat("%Y-%m-%d %H:%M");
+  mgr_rms_EE->GetXaxis()->SetTimeOffset(0,"gmt");
+  ccPedEE_rms->SetGrid();
+  
+  leg_EE_rms->Draw();
+  
+  //   ccPedEE->BuildLegend();
+  
+  
+  
+  
+  
+  
+  TCanvas* ccPedEB_rms = new TCanvas ("ccPedEB_rms","EB noise",1600,600);
+  ccPedEB_rms->SetRightMargin(0.3);
+  
+  TLegend* leg_EB_rms = new TLegend(0.71,0.10,0.99,0.90);
+  
+  TMultiGraph* mgr_rms_EB = new TMultiGraph();
+  for (int iring = 0; iring < 86; iring++) {
+    
+    mgr_rms_EB->Add(gr_rms_ring_plus[iring]);
+    mgr_rms_EB->Add(gr_rms_ring_minus[iring]);
+    
+    leg_EB_rms->AddEntry(gr_rms_ring_plus[iring], gr_rms_ring_plus[iring]->GetTitle(), "pl");
+    leg_EB_rms->AddEntry(gr_rms_ring_minus[iring],gr_rms_ring_minus[iring]->GetTitle(),"pl");
+    
+  }
+  
+  mgr_rms_EB->Draw("APL");
+  mgr_rms_EB->GetYaxis()->SetTitle("rms ADC");
+  mgr_rms_EB->GetXaxis()->SetTitle("time");
+  mgr_rms_EB->GetXaxis()->SetTimeDisplay(1);
+  mgr_rms_EB->GetXaxis()->SetNdivisions(-503);
+  mgr_rms_EB->GetXaxis()->SetTimeFormat("%Y-%m-%d %H:%M");
+  mgr_rms_EB->GetXaxis()->SetTimeOffset(0,"gmt");
+  ccPedEB_rms->SetGrid();
+  
+  leg_EB_rms->Draw();
+  
+  //   ccPedEB->BuildLegend();
   
   
   
