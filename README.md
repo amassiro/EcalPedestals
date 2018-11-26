@@ -40,6 +40,20 @@ Code to plot pedestals extracted from laser sequence
     r00t drawWithType.cxx\(\"Pedestals/laserPed2018_24.10.2018.root\",0\)
     
     
+    python tellMe.py --iz  0 --ix -10 --iy 140
+    
+    
+    python tellMe.py --iz  1 --ix 2 --iy 41
+    python tellMe.py --iz -1 --ix 2 --iy 41
+    
+    //----                                                                  isEE
+    r00t drawWithType.cxx\(\"Pedestals/laserPed2018_24.10.2018.root\",10185,1\)
+    r00t drawWithType.cxx\(\"Pedestals/laserPed2018_24.10.2018.root\",2861,1\)
+    
+    
+    
+    
+    
     
 ROOT Tree content
 

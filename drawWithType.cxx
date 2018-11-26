@@ -2,7 +2,7 @@
 //---- plot pedestals
 //
 
-void drawWithType(std::string nameInputFile = "ana_ped_2016-2017.root", int index = 0, int runNumber = -1) {
+void drawWithType(std::string nameInputFile = "ana_ped_2016-2017.root", int index = 0, int isEE = 0, int runNumber = -1) {
   
   std::cout << " runNumber = " << runNumber << std::endl;
   
@@ -22,11 +22,21 @@ void drawWithType(std::string nameInputFile = "ana_ped_2016-2017.root", int inde
   PedChan -> SetBranchAddress("y", &y);
   PedChan -> SetBranchAddress("z", &z);
   
+  std::cout << " index = " << index << std::endl;
+  std::cout << " isEE = " << isEE << std::endl;
+  
+  if (isEE) {
+    index += 61200;
+  }
+  std::cout << " index = " << index << std::endl;
+  
+  
   PedChan->GetEntry(index);
   
   std::cout << " x :  " << x << std::endl;
   std::cout << " y :  " << y << std::endl;
   std::cout << " z :  " << z << std::endl;
+  std::cout << " Channels :  " << Channels << std::endl;
   
   
   Int_t           fed[75848];
@@ -67,8 +77,19 @@ void drawWithType(std::string nameInputFile = "ana_ped_2016-2017.root", int inde
   int fedNumber = -1;
   
   //---- decide which crystal and fed we will display
-  T->GetEntry(0);
-  fedNumber = fed [index] - 601; //---- first fed for ECAL is 601
+  
+  //---- avoid truncated sequences with "0"
+  for (int ientry = 0; ientry < nEntries; ientry++) {
+    T->GetEntry(ientry);
+    fedNumber = fed [index] - 601;
+    if (fed [index] != 0) {
+      break;
+    }
+  }
+  
+//   T->GetEntry(0);
+//   fedNumber = fed [index] - 601; //---- first fed for ECAL is 601
+  std::cout << " fedNumber = " << fedNumber << " = " << fed [index] << " - 601  = fed[" << index << "] - 601" << std::endl;
   
   
   TString ped_string  = Form ("ped[%d]", index);
@@ -111,8 +132,19 @@ void drawWithType(std::string nameInputFile = "ana_ped_2016-2017.root", int inde
   fedNumber = -1;
   
   //---- decide which crystal and fed we will display
-  T->GetEntry(0);
-  fedNumber = fed [index] - 601; //---- first fed for ECAL is 601
+  //---- avoid truncated sequences with "0"
+  for (int ientry = 0; ientry < nEntries; ientry++) {
+    T->GetEntry(ientry);
+    fedNumber = fed [index] - 601;
+    if (fed [index] != 0) {
+      break;
+    }
+  }
+  
+  //   T->GetEntry(0);
+  //   fedNumber = fed [index] - 601; //---- first fed for ECAL is 601
+  std::cout << " fedNumber = " << fedNumber << " = " << fed [index] << " - 601  = fed[" << index << "] - 601" << std::endl;
+  
   
   
   T->Draw(toDraw.Data(), "", "goff");
