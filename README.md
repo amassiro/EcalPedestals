@@ -35,6 +35,12 @@ Code to plot pedestals extracted from laser sequence
     
     
     
+    
+    /eos/cms/store/group/dpg_ecal/comm_ecal/pedestals_gainratio/laserPed2018_24.10.2018.root
+    r00t drawWithType.cxx\(\"Pedestals/laserPed2018_24.10.2018.root\",0\)
+    
+    
+    
 ROOT Tree content
 
     T rootuple content: 

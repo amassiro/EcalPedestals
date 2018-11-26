@@ -76,6 +76,8 @@ void drawWithType(std::string nameInputFile = "ana_ped_2016-2017.root", int inde
   TString time_string = Form ("time[%d]", fedNumber);
   TString toDraw = Form ("%s : %s : %s", ped_string.Data(), rms_string.Data(), time_string.Data());
   
+  std::cout << " toDraw = " << toDraw.Data() << std::endl;
+  
   T->Draw(toDraw.Data(), "", "goff");
   TGraph *gr_ped_cosmics  = new TGraph(T->GetSelectedRows(), T->GetV3(), T->GetV1());  
   TGraph *gr_rms_cosmics  = new TGraph(T->GetSelectedRows(), T->GetV3(), T->GetV2());  
